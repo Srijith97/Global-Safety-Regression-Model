@@ -1,0 +1,57 @@
+---
+title: "9750 Final Project"
+output: word_document
+date: "2024-11-23"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(dplyr)
+
+#put add line for your directory
+setwd("C:/Users/Taylor's Home/OneDrive - The City University of New York/Fall 2024/STA 9750 Tools/STA 9750 Final Project/Global Data")
+country_data = read.csv("country_data.csv")
+```
+
+```{r clean data}
+new_country_data = country_data[, c("name","homicide_rate","gdp",  "urban_population_growth", "pop_growth", "internet_users", "gdp_per_capita", "refugees")]
+head(new_country_data)
+
+clean_data_homcides <- new_country_data[!is.na(new_country_data$homicide_rate), ]
+no_dupes = clean_data_homcides%>% distinct(name, .keep_all = TRUE)
+
+final_data = no_dupes
+write.csv(final_data, "C:/Users/Taylor's Home/OneDrive - The City University of New York/Fall 2024/STA 9750 Tools/STA 9750 Final Project/Global Data/Final Data.csv")
+```
+
+```{r ANOVA}
+# Perform a multiple ANOVA test
+anova_model = aov(homicide_rate ~ urban_population_growth + pop_growth + internet_users + gdp + refugees + gdp_per_capita, data = final_data)
+
+# Summarize the ANOVA results
+summary(anova_model)
+
+```
+
+```{r}
+library(car)
+
+# Fit a linear model
+linear_model = lm(homicide_rate ~ gdp + urban_population_growth + pop_growth + internet_users + gdp_per_capita + refugees, data = final_data)
+
+# Calculate VIF
+vif_values = vif(linear_model)
+print(vif_values)
+
+cor_matrix = cor(final_data[, c("gdp", "urban_population_growth", "pop_growth", "internet_users", "gdp_per_capita", "refugees")])
+print(cor_matrix)
+
+# Scale numeric variables to standardize them
+numeric_data = final_data[, c("gdp", "urban_population_growth", "pop_growth", "internet_users", "gdp_per_capita", "refugees")]
+scaled_data = scale(numeric_data)
+
+# Calculate condition number
+condition_number = kappa(cor(scaled_data, use = "complete.obs"))
+print(condition_number)
+
+```

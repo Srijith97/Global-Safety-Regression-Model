@@ -1,0 +1,358 @@
+---
+title: "Full Code"
+output: word_document
+date: "2024-12-13"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(dplyr)
+library(ggplot2)
+library(regclass)
+setwd("C:/Users/Taylor's Home/OneDrive - The City University of New York/Fall 2024/STA 9750 Tools/STA 9750 Final Project/Global Data")
+country_data = read.csv("country_data.csv")
+```
+
+```{r cleaning Data}
+new_country_data = country_data[, c("name","homicide_rate","gdp",  "urban_population_growth", "pop_growth", "internet_users", "gdp_per_capita", "refugees")]
+head(new_country_data)
+
+clean_data_homcides <- new_country_data[!is.na(new_country_data$homicide_rate), ]
+no_dupes = clean_data_homcides%>% distinct(name, .keep_all = TRUE)
+
+final_data = no_dupes
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+#library(dplyr)
+#library(ggplot2)
+#library(regclass)
+#setwd("your path")
+#country_data = read.csv("country_data.csv")
+new_country_data <- country_data[, c("name","homicide_rate","gdp",  "urban_population_growth", "pop_growth", "internet_users", "gdp_per_capita", "refugees")]
+clean_data_homcides <- new_country_data[!is.na(new_country_data$homicide_rate), ]
+no_dupes <- clean_data_homcides%>% distinct(name, .keep_all = TRUE)
+final_data <- no_dupes
+```
+
+***Visual analysis using scatterplots:***
+
+**#1. Homicide Rate vs GDP**
+```{r, warning=FALSE}
+ggplot(final_data, aes(y = homicide_rate, x = gdp))+
+  geom_point()
+```
+
+**Perform log transformation on x and y due to heavy skewness**
+```{r, warning=FALSE, message=FALSE}
+ggplot(final_data, aes(y = log(homicide_rate + 1), x = log(gdp + 1)))+
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE)
+```
+
+**Plot seems to indicate an approximate moderate negative linear correlation. Use Pearson's correlation for testing.**
+
+
+**2. Homicide Rate vs Urban Population Growth**
+```{r, warning=FALSE, message=FALSE}
+ggplot(final_data, aes(y = homicide_rate, x=urban_population_growth))+
+  geom_point()
+```
+
+**Perform log transformation on y due to nonlinear and non-monotonic relationship**
+```{r, warning=FALSE, message=FALSE}
+ggplot(final_data, aes(y = log(homicide_rate + 1), x=urban_population_growth+1))+
+  geom_point() +
+  geom_smooth(method = "lm", se=FALSE)
+```
+
+**Plot can be described with a weak positive linear correlation. Use Pearson's correlation for testing.**
+
+
+**3. Homicide Rate vs Population Growth**
+```{r, warning=FALSE, message=FALSE}
+ggplot(final_data, aes(y = homicide_rate, x=pop_growth))+
+  geom_point()
+```
+
+**Perform log transformation on y due to nonlinear and non-monotonic relationship**
+```{r, warning=FALSE, message=FALSE}
+ggplot(final_data, aes(y = log(homicide_rate + 1), x=pop_growth))+
+  geom_point() +
+  geom_smooth(method = "lm", se=FALSE)
+```
+
+**Plot can be described with a weak positive linear correlation. Use Pearson's correlation for testing.**
+
+
+**4. Homicide Rate vs Internet Users Percentage**
+```{r, warning=FALSE, message=FALSE}
+ggplot(final_data, aes(y = homicide_rate, x=internet_users))+
+  geom_point()
+```
+
+**Perform log transformation on y due to nonlinearity and non-monotonic relationship**
+```{r, warning=FALSE, message=FALSE}
+ggplot(final_data, aes(y = log(homicide_rate+1), x=internet_users))+
+  geom_point() +
+  geom_smooth(method="lm",se=FALSE)
+```
+
+**Plot can be described with a moderate negative linear correlation. Use Pearson's correlation for testing.**
+
+
+**5. Homicide Rate vs GDP Per Capita**
+```{r, warning=FALSE, message=FALSE}
+ggplot(final_data, aes(y = homicide_rate, x = gdp_per_capita))+
+  geom_point()
+```
+
+**Perform log transformation on x and y due to heavy skewness**
+```{r, warning=FALSE, message=FALSE}
+ggplot(final_data, aes(y = log(homicide_rate + 1), x = log(gdp_per_capita + 1)))+
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE)
+```
+
+**Plot seems to indicate a moderate negative linear correlation. Use Pearson's correlation for testing.**
+
+
+**6. Homicide Rate vs Refugees**
+```{r, warning=FALSE, message=FALSE}
+ggplot(final_data, aes(y = homicide_rate, x=refugees))+
+  geom_point()
+```
+
+**Perform log transformation on x and y due to heavy skewness.**
+```{r, warning=FALSE, message=FALSE}
+ggplot(final_data, aes(y = log(homicide_rate+1), x=log(refugees)))+
+  geom_point() +
+  geom_smooth(method="lm",se=FALSE)
+```
+
+**Plot seems to indicate a weak negative linear correlation. Use Pearson's correlation for testing.**
+
+
+***Association Analysis***
+
+**1. log Homicide Rate vs log GDP**
+```{r, fig.show='hide', warning=FALSE}
+associate(log(homicide_rate + 1)~log(gdp + 1), data=final_data, seed=9750)
+
+```
+**There exists a statistically significant correlation, p-value = 0. There is a moderate negative linear correlation, r = -0.2951072**
+
+
+**2. log Homicide Rate vs Urban Population Growth**
+```{r, fig.show='hide', warning=FALSE}
+associate(log(homicide_rate+1)~urban_population_growth, data=final_data, seed=9750)
+```
+**There does not exist a statistically significant correlation, p-value = 0.186**
+
+
+**3. log Homicide Rate vs Population Growth**
+```{r, fig.show='hide', warning=FALSE}
+associate(log(homicide_rate+1)~pop_growth, data=final_data, seed=9750)
+```
+**There is not a statistically significant correlation, p-value = 0.268**
+
+
+**4. log Homicide Rate vs Internet Users Percentage**
+```{r, fig.show='hide', warning=FALSE}
+associate(log(homicide_rate+1)~internet_users, data=final_data, seed=9750)
+```
+**There exists a statistically significant correlation, p-value = 0. There is a moderate negative linear correlation, r = -0.3205548**
+
+
+**5. log Homicide Rate vs log GDP Per Capita**
+```{r, fig.show='hide', warning=FALSE}
+associate(log(homicide_rate+1)~log(gdp_per_capita+1), data=final_data, seed=9750)
+```
+**There exists a statistically significant association, p-value = 0. There is a moderate negative linear correlation, r = -0.3025433**
+
+
+**6. log Homicide Rate vs log Refugee Population**
+```{r, fig.show='hide', warning=FALSE}
+associate(log(homicide_rate+1)~log(refugees+1), data=final_data, seed=9750)
+```
+**There is not a statistically significant correlation, p-value = 0.456**
+```{r ANOVA}
+# Perform a multiple ANOVA test
+anova_model = aov(homicide_rate ~ urban_population_growth + pop_growth + internet_users + gdp + refugees + gdp_per_capita, data = final_data)
+
+# Summarize the ANOVA results
+summary(anova_model)
+
+```
+
+```{r}
+library(car)
+# Fit a linear model
+linear_model = lm(homicide_rate ~ gdp + urban_population_growth + pop_growth + internet_users + gdp_per_capita + refugees, data = final_data)
+
+# Calculate VIF
+vif_values = vif(linear_model)
+print(vif_values)
+
+cor_matrix = cor(final_data[, c("gdp", "urban_population_growth", "pop_growth", "internet_users", "gdp_per_capita", "refugees")])
+print(cor_matrix)
+
+# Scale numeric variables to standardize them
+numeric_data = final_data[, c("gdp", "urban_population_growth", "pop_growth", "internet_users", "gdp_per_capita", "refugees")]
+scaled_data = scale(numeric_data)
+
+# Calculate condition number
+condition_number = kappa(cor(scaled_data, use = "complete.obs"))
+print(condition_number)
+
+```
+
+```{r Regressional Analysis}
+library(ggplot2)
+#country_data = read.csv("country_data.csv")
+new_country_data = country_data[, c("name","homicide_rate","gdp",  "urban_population_growth", "pop_growth", "internet_users", "gdp_per_capita", "refugees")]
+head(new_country_data)
+clean_data_homcides <- new_country_data[!is.na(new_country_data$homicide_rate), ]
+no_dupes = clean_data_homcides%>% distinct(name, .keep_all = TRUE)
+final_data = no_dupes
+names(final_data)
+#Regression Analysis
+##Fit a Regression line(HOMICIDE RATE vs GDP)
+M<-lm(homicide_rate~gdp,data=final_data)
+##Scatterplot with line(HOMICIDE RATE vs GDP)
+library(ggplot2)
+ggplot(data=final_data, aes(x = gdp, y = homicide_rate)) +
+  geom_point() +
+  scale_x_log10() +
+  #geom_smooth(method = "lm", se = FALSE, col = "red") +
+  labs(x = "GDP", y = "Homicide Rate") 
+
+##Coefficients,standard error,R^2,RMSE,p-value(HOMICIDE RATE vs GDP)
+summary(M)
+
+##sum of squared error reduction(HOMICIDE RATE vs GDP)
+anova(M)
+
+##Confidence interval for coefficients(HOMICIDE RATE vs GDP)
+confint(M,level=0.95)
+
+##Fit a Regression line(HOMICIDE RATE vs urban_population_growth)
+M<-lm(homicide_rate~urban_population_growth,data=final_data)
+##Scatterplot with line(HOMICIDE RATE vs urban_population_growth)
+library(ggplot2)
+ggplot(data=final_data, aes(x = urban_population_growth, y = homicide_rate)) +
+  geom_point() +
+  #scale_x_log10() +
+  #geom_smooth(method = "lm", se = FALSE, col = "red") +
+  labs(x = "urban_population_growth", y = "homicide_rate") 
+
+##Coefficients,standard error,R^2,RMSE,p-value(HOMICIDE RATE vs urban_population_growth)
+summary(M)
+
+##sum of squared error reduction(HOMICIDE RATE vs urban_population_growth)
+anova(M)
+
+##Confidence interval for coefficients(HOMICIDE RATE vs urban_population_growth)
+confint(M,level=0.95)
+
+##Fit a Regression line(HOMICIDE RATE vs pop_growth)
+M<-lm(homicide_rate~pop_growth,data=final_data)
+##Scatterplot with line(HOMICIDE RATE vs pop_growth)
+library(ggplot2)
+ggplot(data=final_data, aes(x = pop_growth, y = homicide_rate)) +
+  geom_point() +
+  #scale_x_log10() +
+  #geom_smooth(method = "lm", se = FALSE, col = "red") +
+  labs(x = "pop_growth", y = "homicide_rate") 
+
+##Coefficients,standard error,R^2,RMSE,p-value(HOMICIDE RATE vs pop_growth)
+summary(M)
+
+##sum of squared error reduction(HOMICIDE RATE vs pop_growth)
+anova(M)
+
+##Confidence interval for coefficients(HOMICIDE RATE vs pop_growth)
+confint(M,level=0.95)
+
+##Fit a Regression line(HOMICIDE RATE vs internet_users)
+M<-lm(homicide_rate~internet_users,data=final_data)
+##Scatterplot with line(HOMICIDE RATE vs internet_users)
+library(ggplot2)
+ggplot(data=final_data, aes(x = internet_users, y = homicide_rate)) +
+  geom_point() +
+  #scale_x_log10() +
+  #geom_smooth(method = "lm", se = FALSE, col = "red") +
+  labs(x = "internet_users", y = "homicide_rate") 
+
+##Coefficients,standard error,R^2,RMSE,p-value(HOMICIDE RATE vs internet_users)
+summary(M)
+
+##sum of squared error reduction(HOMICIDE RATE vs internet_users)
+anova(M)
+
+##Confidence interval for coefficients(HOMICIDE RATE vs internet_users)
+confint(M,level=0.95)
+
+##Fit a Regression line(HOMICIDE RATE vs gdp_per_capita)
+M<-lm(homicide_rate~gdp_per_capita,data=final_data)
+##Scatterplot with line(HOMICIDE RATE vs gdp_per_capita)
+library(ggplot2)
+ggplot(data=final_data, aes(x = gdp_per_capita, y = homicide_rate)) +
+  geom_point() +
+  scale_x_log10() +
+  #geom_smooth(method = "lm", se = FALSE, col = "red") +
+  labs(x = "log(gdp_per_capita)", y = "homicide_rate") 
+
+##Coefficients,standard error,R^2,RMSE,p-value(HOMICIDE RATE vs gdp_per_capita)
+summary(M)
+
+##sum of squared error reduction(HOMICIDE RATE vs gdp_per_capita)
+anova(M)
+
+##Confidence interval for coefficients(HOMICIDE RATE vs gdp_per_capita)
+confint(M,level=0.95)
+
+##Fit a Regression line(HOMICIDE RATE vs refugees)
+M<-lm(homicide_rate~refugees,data=final_data)
+##Scatterplot with line(HOMICIDE RATE vs refugees)
+library(ggplot2)
+ggplot(data=final_data, aes(x = refugees, y = homicide_rate)) +
+  geom_point() +
+  scale_x_log10() +
+  #geom_smooth(method = "lm", se = FALSE, col = "red") +
+  labs(x = "refugees", y = "homicide_rate") 
+
+##Coefficients,standard error,R^2,RMSE,p-value(HOMICIDE RATE vs refugees)
+summary(M)
+
+##sum of squared error reduction(HOMICIDE RATE vs refugees)
+anova(M)
+
+##Confidence interval for coefficients(HOMICIDE RATE vs refugees)
+confint(M,level=0.95)
+
+#Fit a Multilinear Regression Model
+M<-lm(homicide_rate~gdp+urban_population_growth+pop_growth+internet_users+gdp_per_capita+refugees,data=final_data)
+
+##Scatterplot with line(HOMICIDE RATE vs all predictors)
+library(ggplot2)
+ggplot(data=final_data, aes(x = gdp+urban_population_growth+pop_growth+internet_users+gdp_per_capita+refugees, y = homicide_rate)) +
+  geom_point() +
+  scale_x_log10() +
+  geom_smooth(method = "lm", se = FALSE, col = "red") +
+  labs(x = "All predictors", y = "homicide_rate") 
+
+##Coefficients,standard error,R^2,RMSE,p-value(HOMICIDE RATE vs all predictors)
+summary(M)
+
+##sum of squared error reduction(HOMICIDE RATE vs all predictors)
+anova(M)
+
+##Confidence interval for coefficients(HOMICIDE RATE vs all predictors)
+confint(M,level=0.95)
+
+```

@@ -1,0 +1,25 @@
+---
+title: "9750 Final Project"
+output: word_document
+date: "2024-11-23"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(dplyr)
+
+#put add line for your directory
+setwd("C:/Users/Taylor's Home/OneDrive - The City University of New York/Fall 2024/STA 9750 Tools/STA 9750 Final Project/Global Data")
+country_data = read.csv("country_data.csv")
+```
+
+
+```{r}
+new_country_data = country_data[, c("name","homicide_rate","gdp",  "urban_population_growth", "pop_growth", "internet_users", "gdp_per_capita", "refugees")]
+head(new_country_data)
+
+clean_data_homcides <- new_country_data[!is.na(new_country_data$homicide_rate), ]
+no_dupes = clean_data_homcides%>% distinct(name, .keep_all = TRUE)
+
+final_data = no_dupes
+```
